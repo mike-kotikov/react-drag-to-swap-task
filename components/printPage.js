@@ -77,10 +77,9 @@ export default function PrintPage({ data, handleDrop }) {
         return
       }
 
-      const targetImageUrl = droppedToElement.dataset.droppable
-      handleDrop(target.src, targetImageUrl)
+      handleDrop(target.src, droppedToElement.dataset.droppable)
       setAnimateDroppedImage(target.src)
-      setAnimateReplacedImage(targetImageUrl)
+      setAnimateReplacedImage(droppedToElement.dataset.droppable)
     }, 0)
   }
 
@@ -98,43 +97,36 @@ export default function PrintPage({ data, handleDrop }) {
   }
 
   const getPhotoClasses = imageUrl =>
-    `${animateDroppedImage === imageUrl && 'animate-dropped'} ${
-      animateReplacedImage === imageUrl && 'animate-fadeout'
-    }`
+    `${animateDroppedImage === imageUrl ? 'animate-dropped' : ''}
+    ${animateReplacedImage === imageUrl ? 'animate-fadeout' : ''}`.trim()
 
   return (
-    <>
-      <Wrapper>
-        {Object.values(data).map((entry, index) => {
-          return (
-            <PrintWrapper key={entry.title}>
-              <Header>
-                <Title>{entry.title}</Title>
-                <Actions />
-              </Header>
-              <PageLayout data-droppable={`page-${index}`}>
-                {entry.images.map(imageUrl => {
-                  return (
-                    <PrintPhoto
-                      className={getPhotoClasses(imageUrl)}
-                      key={imageUrl}
-                      bgImg={imageUrl}
-                      data-droppable={imageUrl}
-                      onMouseDown={handleImageClick}
-                    >
-                      <DraggableImage
-                        src={imageUrl}
-                        isDragging={dragImageUrl === imageUrl}
-                        onMouseMove={handleMouseMove}
-                      />
-                    </PrintPhoto>
-                  )
-                })}
-              </PageLayout>
-            </PrintWrapper>
-          )
-        })}
-      </Wrapper>
-    </>
+    <Wrapper>
+      {Object.values(data).map((entry, index) => (
+        <PrintWrapper key={entry.title}>
+          <Header>
+            <Title>{entry.title}</Title>
+            <Actions />
+          </Header>
+          <PageLayout data-droppable={`page-${index}`}>
+            {entry.images.map(imageUrl => (
+              <PrintPhoto
+                className={getPhotoClasses(imageUrl)}
+                key={imageUrl}
+                bgImg={imageUrl}
+                data-droppable={imageUrl}
+                onMouseDown={handleImageClick}
+              >
+                <DraggableImage
+                  src={imageUrl}
+                  isDragging={dragImageUrl === imageUrl}
+                  onMouseMove={handleMouseMove}
+                />
+              </PrintPhoto>
+            ))}
+          </PageLayout>
+        </PrintWrapper>
+      ))}
+    </Wrapper>
   )
 }

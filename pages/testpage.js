@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import PrintPage from '../components/printPage'
 import styled from 'styled-components'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 const PageHeader = styled.div`
   width: 600px;
@@ -51,7 +51,7 @@ const DEFAULT_DATA = [
 export default function Testpage() {
   const [data, setData] = useState(DEFAULT_DATA)
 
-  const handleDrop = (draggedImageUrl, targetImageUrl) => {
+  const handleDrop = useCallback((draggedImageUrl, targetImageUrl) => {
     if (!draggedImageUrl || !targetImageUrl || draggedImageUrl === targetImageUrl) {
       return
     }
@@ -66,23 +66,13 @@ export default function Testpage() {
           return page
         }
 
+        let images = []
         if (typeof targetPageIndex === 'number' && targetPageIndex !== index) {
-          return {
-            ...page,
-            images: page.images.filter(img => img !== draggedImageUrl)
-          }
-        }
-
-        if (targetPageIndex === index) {
-          return {
-            ...page,
-            images: [...page.images, draggedImageUrl]
-          }
-        }
-
-        return {
-          ...page,
-          images: page.images.map(img => {
+          images = page.images.filter(img => img !== draggedImageUrl)
+        } else if (targetPageIndex === index) {
+          images = [...page.images, draggedImageUrl]
+        } else {
+          images = page.images.map(img => {
             if (img === draggedImageUrl) {
               return targetImageUrl
             }
@@ -92,9 +82,14 @@ export default function Testpage() {
             return img
           })
         }
+
+        return {
+          ...page,
+          images
+        }
       })
     )
-  }
+  }, [data])
 
   return (
     <div>
