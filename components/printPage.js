@@ -38,6 +38,7 @@ const PrintPhoto = styled.div`
   height: 150px;
   background-size: cover;
   background-image: url(${props => props.bgImg});
+  cursor: grab;
 `
 
 const DraggableImage = styled.img`
@@ -50,10 +51,13 @@ const DraggableImage = styled.img`
   position: absolute;
   object-fit: cover;
   transform: translate(-50%, -50%);
+  cursor: grabbing;
 `
 
 export default function PrintPage({ data, handleDrop }) {
   const [dragImageUrl, setDragImageUrl] = useState('')
+  const [animateDroppedImage, setAnimateDroppedImage] = useState('')
+  const [animateReplacedImage, setAnimateReplacedImage] = useState('')
 
   const onMouseMove = (elem, pageX, pageY) => {
     if (!elem) {
@@ -63,18 +67,20 @@ export default function PrintPage({ data, handleDrop }) {
     elem.style.left = `${pageX}px`
   }
 
-  const handleMouseUp = event => {
+  const handleMouseUp = ({ clientX, clientY, target }) => {
     setDragImageUrl('')
 
     setTimeout(() => {
-      const droppedToElement = document.elementFromPoint(event.clientX, event.clientY)
+      const droppedToElement = document.elementFromPoint(clientX, clientY)
 
       if (!droppedToElement || !droppedToElement.dataset.hasOwnProperty('droppable')) {
         return
       }
 
       const targetImageUrl = droppedToElement.dataset.droppable
-      handleDrop(event.target.src, targetImageUrl)
+      handleDrop(target.src, targetImageUrl)
+      setAnimateDroppedImage(target.src)
+      setAnimateReplacedImage(targetImageUrl)
     }, 0)
   }
 
@@ -91,6 +97,11 @@ export default function PrintPage({ data, handleDrop }) {
     setDragImageUrl(target.dataset.droppable)
   }
 
+  const getPhotoClasses = imageUrl =>
+    `${animateDroppedImage === imageUrl && 'animate-dropped'} ${
+      animateReplacedImage === imageUrl && 'animate-fadeout'
+    }`
+
   return (
     <>
       <Wrapper>
@@ -105,6 +116,7 @@ export default function PrintPage({ data, handleDrop }) {
                 {entry.images.map(imageUrl => {
                   return (
                     <PrintPhoto
+                      className={getPhotoClasses(imageUrl)}
                       key={imageUrl}
                       bgImg={imageUrl}
                       data-droppable={imageUrl}
